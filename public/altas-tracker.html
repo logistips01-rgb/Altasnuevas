@@ -1,0 +1,1095 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Altas Nuevas · Control y Verificación</title>
+<style>
+  :root{
+    --bg:#12161C;
+    --bg-elev:#1A202A;
+    --bg-elev-2:#212938;
+    --line:#2C3646;
+    --text:#E8EAED;
+    --text-dim:#9AA5B4;
+    --accent:#D9A441;
+    --accent-dim:#8A6C2E;
+    --ok:#4C9A6A;
+    --warn:#D9A441;
+    --bad:#C1443D;
+    --pend:#5B6779;
+    --radius:10px;
+    --font-display: 'Oswald', 'Arial Narrow', sans-serif;
+    --font-body: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    --font-mono: 'SF Mono', 'Consolas', monospace;
+  }
+  @import url('https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;600;700&display=swap');
+  *{box-sizing:border-box; margin:0; padding:0;}
+  body{
+    background:var(--bg);
+    color:var(--text);
+    font-family:var(--font-body);
+    min-height:100vh;
+    -webkit-font-smoothing:antialiased;
+  }
+  ::-webkit-scrollbar{width:8px; height:8px;}
+  ::-webkit-scrollbar-thumb{background:var(--line); border-radius:4px;}
+
+  /* ---------- LOGIN ---------- */
+  #loginScreen{
+    min-height:100vh; display:flex; align-items:center; justify-content:center;
+    background:radial-gradient(circle at 30% 20%, #1B222D 0%, var(--bg) 60%);
+  }
+  .login-box{
+    background:var(--bg-elev); border:1px solid var(--line); border-radius:var(--radius);
+    padding:40px 36px; width:340px;
+  }
+  .login-logo{display:flex; align-items:center; gap:12px; margin-bottom:28px;}
+  .logo-mark{
+    width:40px; height:40px; border-radius:8px; background:var(--accent);
+    display:flex; align-items:center; justify-content:center;
+    font-family:var(--font-display); font-weight:700; color:#12161C; font-size:20px;
+  }
+  .login-title{font-family:var(--font-display); font-weight:600; font-size:18px; letter-spacing:.5px;}
+  .login-sub{color:var(--text-dim); font-size:12px; margin-top:2px;}
+  .field{margin-bottom:14px;}
+  .field label{display:block; font-size:11px; text-transform:uppercase; letter-spacing:.06em; color:var(--text-dim); margin-bottom:6px;}
+  .field input, select, textarea{
+    width:100%; background:var(--bg-elev-2); border:1px solid var(--line); color:var(--text);
+    padding:10px 12px; border-radius:6px; font-size:14px; font-family:var(--font-body);
+  }
+  .field input:focus, select:focus, textarea:focus{outline:none; border-color:var(--accent);}
+  .btn{
+    background:var(--accent); color:#12161C; border:none; padding:11px 18px; border-radius:6px;
+    font-weight:600; font-size:13px; cursor:pointer; letter-spacing:.02em;
+  }
+  .btn:hover{filter:brightness(1.08);}
+  .btn-secondary{background:transparent; border:1px solid var(--line); color:var(--text);}
+  .btn-secondary:hover{border-color:var(--accent); color:var(--accent);}
+  .btn-danger{background:transparent; border:1px solid var(--bad); color:var(--bad);}
+  .btn-danger:hover{background:var(--bad); color:var(--text);}
+  .btn-block{width:100%;}
+  .btn-small{padding:6px 12px; font-size:12px;}
+  .error-msg{color:var(--bad); font-size:12px; margin-top:10px; min-height:14px;}
+
+  /* ---------- APP SHELL ---------- */
+  #appShell{display:none; min-height:100vh;}
+  header.topbar{
+    display:flex; align-items:center; justify-content:space-between;
+    padding:14px 24px; border-bottom:1px solid var(--line); background:var(--bg-elev);
+  }
+  .topbar-left{display:flex; align-items:center; gap:14px;}
+  .topbar-title{font-family:var(--font-display); font-weight:600; font-size:16px; letter-spacing:.3px;}
+  .topbar-sub{color:var(--text-dim); font-size:11px; text-transform:uppercase; letter-spacing:.08em;}
+  .topbar-right{display:flex; align-items:center; gap:14px; font-size:13px; color:var(--text-dim);}
+  main{padding:24px; max-width:1280px; margin:0 auto;}
+
+  /* ---------- DASHBOARD ---------- */
+  .dash-header{display:flex; align-items:center; justify-content:space-between; margin-bottom:18px;}
+  .dash-header h2{font-family:var(--font-display); font-weight:500; font-size:20px;}
+  .stat-row{display:flex; gap:14px; margin-bottom:24px;}
+  .stat-card{
+    background:var(--bg-elev); border:1px solid var(--line); border-radius:var(--radius);
+    padding:16px 20px; flex:1;
+  }
+  .stat-num{font-family:var(--font-display); font-size:28px; font-weight:600;}
+  .stat-label{color:var(--text-dim); font-size:11px; text-transform:uppercase; letter-spacing:.06em; margin-top:4px;}
+  .stat-card.ok .stat-num{color:var(--ok);}
+  .stat-card.warn .stat-num{color:var(--warn);}
+  .stat-card.bad .stat-num{color:var(--bad);}
+
+  .toolbar-select{margin-bottom:14px;}
+  .filter-toggle{display:flex; gap:8px; margin-bottom:14px;}
+  .filter-toggle button{
+    background:var(--bg-elev); border:1px solid var(--line); color:var(--text-dim);
+    padding:6px 14px; border-radius:20px; font-size:12px; cursor:pointer;
+  }
+  .filter-toggle button.active{border-color:var(--accent); color:var(--accent);}
+
+  .altas-list{display:flex; flex-direction:column; gap:10px;}
+  .alta-card{
+    background:var(--bg-elev); border:1px solid var(--line); border-left:4px solid var(--pend);
+    border-radius:8px; padding:16px 18px; cursor:pointer; display:flex; align-items:center; gap:18px;
+    transition:border-color .15s;
+  }
+  .alta-card:hover{border-color:var(--accent);}
+  .alta-card.semaforo-verde{border-left-color:var(--ok);}
+  .alta-card.semaforo-ambar{border-left-color:var(--warn);}
+  .alta-card.semaforo-rojo{border-left-color:var(--bad);}
+  .alta-card.archivada{opacity:.55;}
+  .alta-main{flex:1; min-width:0;}
+  .alta-ref{font-family:var(--font-mono); font-size:13px; color:var(--accent);}
+  .alta-cliente{font-weight:600; font-size:15px; margin-top:2px;}
+  .alta-meta{color:var(--text-dim); font-size:12px; margin-top:4px;}
+  .alta-progress-group{display:flex; gap:18px; align-items:center;}
+  .mini-prog{text-align:center; width:70px;}
+  .mini-prog-bar{height:5px; background:var(--bg-elev-2); border-radius:3px; overflow:hidden; margin-bottom:5px;}
+  .mini-prog-fill{height:100%; background:var(--ok); border-radius:3px;}
+  .mini-prog-label{font-size:10px; color:var(--text-dim); text-transform:uppercase; letter-spacing:.05em;}
+  .alta-dias{
+    font-family:var(--font-display); font-size:22px; font-weight:600; width:70px; text-align:center;
+  }
+  .alta-dias-label{font-size:10px; color:var(--text-dim); text-transform:uppercase; text-align:center; margin-top:2px;}
+
+  .empty-state{
+    text-align:center; padding:60px 20px; color:var(--text-dim);
+  }
+
+  /* ---------- DETAIL VIEW ---------- */
+  #detailView{display:none;}
+  .detail-header{display:flex; align-items:center; gap:14px; margin-bottom:18px;}
+  .back-btn{background:none; border:none; color:var(--text-dim); cursor:pointer; font-size:20px; padding:4px 8px;}
+  .back-btn:hover{color:var(--accent);}
+  .detail-title-group{flex:1;}
+  .detail-title-group h2{font-family:var(--font-display); font-size:20px; font-weight:500;}
+  .detail-title-group .alta-meta{margin-top:2px;}
+  .detail-actions{display:flex; gap:10px;}
+
+  .tabs{display:flex; gap:2px; border-bottom:1px solid var(--line); margin-bottom:22px; flex-wrap:wrap;}
+  .tab-btn{
+    background:none; border:none; color:var(--text-dim); padding:10px 16px; cursor:pointer;
+    font-size:13px; font-weight:600; text-transform:uppercase; letter-spacing:.04em;
+    border-bottom:2px solid transparent; display:flex; align-items:center; gap:8px;
+  }
+  .tab-btn.active{color:var(--accent); border-bottom-color:var(--accent);}
+  .tab-btn .badge-count{
+    background:var(--bg-elev-2); color:var(--text-dim); font-size:10px; padding:1px 6px; border-radius:8px;
+  }
+  .tab-btn.active .badge-count{background:var(--accent-dim); color:#12161C;}
+  .tab-panel{display:none;}
+  .tab-panel.active{display:block;}
+
+  .field-grid{display:grid; grid-template-columns:repeat(auto-fill, minmax(230px,1fr)); gap:14px;}
+  .field-block{
+    background:var(--bg-elev); border:1px solid var(--line); border-radius:8px; padding:12px 14px;
+  }
+  .field-block label{display:block; font-size:10px; text-transform:uppercase; letter-spacing:.05em; color:var(--text-dim); margin-bottom:6px;}
+  .field-block input, .field-block select, .field-block textarea{
+    width:100%; background:var(--bg-elev-2); border:1px solid var(--line); color:var(--text);
+    padding:7px 9px; border-radius:5px; font-size:13px;
+  }
+  .field-meta{font-size:10px; color:var(--text-dim); margin-top:6px; font-style:italic;}
+
+  /* Verificación física checklist */
+  .verif-item{
+    background:var(--bg-elev); border:1px solid var(--line); border-radius:8px;
+    padding:14px 16px; margin-bottom:10px; display:flex; gap:16px; align-items:flex-start;
+  }
+  .verif-item.estado-verificado{border-left:3px solid var(--ok);}
+  .verif-item.estado-fallo{border-left:3px solid var(--bad);}
+  .verif-item.estado-pendiente{border-left:3px solid var(--pend);}
+  .verif-icon{font-size:20px; width:26px; text-align:center; margin-top:2px;}
+  .verif-body{flex:1;}
+  .verif-title{font-weight:600; font-size:14px; margin-bottom:2px;}
+  .verif-desc{font-size:12px; color:var(--text-dim); margin-bottom:10px;}
+  .verif-controls{display:flex; gap:10px; flex-wrap:wrap; align-items:center;}
+  .verif-controls select{width:auto; min-width:130px;}
+  .verif-controls input[type=text]{width:auto; flex:1; min-width:180px;}
+  .verif-meta{font-size:10px; color:var(--text-dim); margin-top:8px; font-style:italic;}
+
+  .section-label{
+    font-family:var(--font-display); font-size:13px; text-transform:uppercase; letter-spacing:.08em;
+    color:var(--accent); margin:22px 0 12px; padding-bottom:6px; border-bottom:1px solid var(--line);
+  }
+  .section-label:first-child{margin-top:0;}
+
+  .toolbar{display:flex; gap:10px; margin-bottom:18px;}
+
+  .modal-overlay{
+    display:none; position:fixed; inset:0; background:rgba(10,13,17,.7); z-index:50;
+    align-items:center; justify-content:center;
+  }
+  .modal-box{
+    background:var(--bg-elev); border:1px solid var(--line); border-radius:var(--radius);
+    padding:28px; width:420px; max-height:80vh; overflow-y:auto;
+  }
+  .modal-box h3{font-family:var(--font-display); font-weight:600; margin-bottom:18px; font-size:17px;}
+  .modal-box p{font-size:13px; color:var(--text-dim); margin-bottom:18px; line-height:1.5;}
+
+  .toast{
+    position:fixed; bottom:24px; right:24px; background:var(--bg-elev-2); border:1px solid var(--accent);
+    color:var(--text); padding:12px 18px; border-radius:8px; font-size:13px; z-index:100;
+    display:none; max-width:420px; white-space:pre-line;
+  }
+
+  .estado-select{width:auto !important;}
+  .top-alert{
+    background:rgba(193,68,61,.12); border:1px solid var(--bad); color:#F0A9A4;
+    padding:12px 16px; border-radius:8px; margin-bottom:18px; font-size:13px; display:none;
+    align-items:center; gap:10px;
+  }
+</style>
+</head>
+<body>
+
+<!-- ============ LOGIN ============ -->
+<div id="loginScreen">
+  <div class="login-box">
+    <div class="login-logo">
+      <div class="logo-mark">A</div>
+      <div>
+        <div class="login-title">ALTAS NUEVAS</div>
+        <div class="login-sub">Control y verificación</div>
+      </div>
+    </div>
+    <div class="field">
+      <label>Email</label>
+      <input type="email" id="loginEmail" placeholder="tu@aldelis.com">
+    </div>
+    <div class="field">
+      <label>Contraseña</label>
+      <input type="password" id="loginPass" placeholder="••••••••">
+    </div>
+    <button class="btn btn-block" onclick="doLogin()">Entrar</button>
+    <div class="error-msg" id="loginError"></div>
+  </div>
+</div>
+
+<!-- ============ APP ============ -->
+<div id="appShell">
+  <header class="topbar">
+    <div class="topbar-left">
+      <div class="logo-mark" style="width:32px;height:32px;font-size:15px;">A</div>
+      <div>
+        <div class="topbar-title">Altas Nuevas</div>
+        <div class="topbar-sub">Control y Verificación</div>
+      </div>
+    </div>
+    <div class="topbar-right">
+      <span id="userEmailLabel"></span>
+      <button class="btn btn-secondary btn-small" onclick="openStockView()">Stock</button>
+      <button class="btn btn-secondary btn-small" onclick="doLogout()">Salir</button>
+    </div>
+  </header>
+
+  <main>
+    <!-- ===== DASHBOARD ===== -->
+    <div id="dashboardView">
+      <div class="top-alert" id="topAlert"></div>
+
+      <div class="dash-header">
+        <h2>Panel de altas</h2>
+        <div class="toolbar">
+          <button class="btn btn-secondary btn-small" onclick="exportExcel()">Exportar Excel</button>
+          <button class="btn btn-small" onclick="openNewAltaModal()">+ Nueva alta</button>
+        </div>
+      </div>
+
+      <div class="stat-row">
+        <div class="stat-card">
+          <div class="stat-num" id="statTotal">0</div>
+          <div class="stat-label">Altas activas</div>
+        </div>
+        <div class="stat-card bad">
+          <div class="stat-num" id="statRojo">0</div>
+          <div class="stat-label">En riesgo (rojo)</div>
+        </div>
+        <div class="stat-card warn">
+          <div class="stat-num" id="statAmbar">0</div>
+          <div class="stat-label">Pendientes de revisar</div>
+        </div>
+        <div class="stat-card ok">
+          <div class="stat-num" id="statVerde">0</div>
+          <div class="stat-label">Listas para arrancar</div>
+        </div>
+      </div>
+
+      <div class="filter-toggle">
+        <button id="filterActivas" class="active" onclick="setDashboardFilter('activas')">Activas</button>
+        <button id="filterArchivadas" onclick="setDashboardFilter('archivadas')">Archivadas</button>
+      </div>
+
+      <div class="altas-list" id="altasList"></div>
+      <div class="empty-state" id="emptyState" style="display:none;">
+        No hay altas registradas todavía. Crea la primera con "+ Nueva alta".
+      </div>
+    </div>
+
+    <!-- ===== STOCK GENERAL ===== -->
+    <div id="stockView" style="display:none;">
+      <div class="detail-header">
+        <button class="back-btn" onclick="closeStockView()">←</button>
+        <div class="detail-title-group">
+          <h2>Stock general</h2>
+          <div class="alta-meta">Inventario usado para comparar contra las necesidades de cada alta</div>
+        </div>
+      </div>
+      <div class="toolbar">
+        <label class="btn btn-small" style="cursor:pointer;">
+          Importar Excel
+          <input type="file" accept=".xlsx,.xls" style="display:none;" onchange="handleStockExcel(this)">
+        </label>
+      </div>
+      <div class="field-meta" style="margin-bottom:14px;">
+        Columnas esperadas: <strong>Código</strong>, Descripción, Cantidad, Unidad.
+      </div>
+      <div style="background:var(--bg-elev); border:1px solid var(--line); border-radius:8px; overflow:hidden;">
+        <table style="width:100%; border-collapse:collapse; font-size:13px;">
+          <thead>
+            <tr style="background:var(--bg-elev-2); text-align:left;">
+              <th style="padding:10px 14px;">Código</th>
+              <th style="padding:10px 14px;">Descripción</th>
+              <th style="padding:10px 14px;">Cantidad</th>
+              <th style="padding:10px 14px;">Unidad</th>
+              <th style="padding:10px 14px;">Actualizado</th>
+            </tr>
+          </thead>
+          <tbody id="stockTableBody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ===== DETAIL ===== -->
+    <div id="detailView">
+      <div class="detail-header">
+        <button class="back-btn" onclick="closeDetail()">←</button>
+        <div class="detail-title-group">
+          <h2 id="detailTitle">—</h2>
+          <div class="alta-meta" id="detailMeta">—</div>
+        </div>
+        <div class="detail-actions">
+          <button class="btn btn-secondary btn-small" id="archiveBtn" onclick="openArchiveModal()">Archivar alta</button>
+        </div>
+      </div>
+
+      <div class="tabs">
+        <button class="tab-btn active" data-tab="comercial" onclick="switchTab('comercial')">Comercial</button>
+        <button class="tab-btn" data-tab="idi" onclick="switchTab('idi')">I+D</button>
+        <button class="tab-btn" data-tab="it" onclick="switchTab('it')">IT</button>
+        <button class="tab-btn" data-tab="lab" onclick="switchTab('lab')">Laboratorio</button>
+        <button class="tab-btn" data-tab="verif" onclick="switchTab('verif')">
+          Verificación física <span class="badge-count" id="verifBadge">0/9</span>
+        </button>
+      </div>
+
+      <div class="tab-panel active" id="panel-comercial"></div>
+      <div class="tab-panel" id="panel-idi"></div>
+      <div class="tab-panel" id="panel-it"></div>
+      <div class="tab-panel" id="panel-lab"></div>
+      <div class="tab-panel" id="panel-verif"></div>
+    </div>
+  </main>
+</div>
+
+<!-- ===== MODAL NUEVA ALTA ===== -->
+<div class="modal-overlay" id="newAltaModal">
+  <div class="modal-box">
+    <h3>Nueva alta</h3>
+    <div class="field">
+      <label>Referencia (REF)</label>
+      <input type="text" id="newRef" placeholder="Ej. 12345">
+    </div>
+    <div class="field">
+      <label>Cliente</label>
+      <input type="text" id="newCliente" placeholder="Ej. Mercadona">
+    </div>
+    <div class="field">
+      <label>Fecha de producción prevista</label>
+      <input type="date" id="newFechaProd">
+    </div>
+    <div style="display:flex; gap:10px; margin-top:20px;">
+      <button class="btn btn-secondary btn-block" onclick="closeNewAltaModal()">Cancelar</button>
+      <button class="btn btn-block" onclick="createAlta()">Crear</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== MODAL ARCHIVAR ALTA ===== -->
+<div class="modal-overlay" id="archiveModal">
+  <div class="modal-box">
+    <h3>Archivar alta</h3>
+    <p>La alta dejará de aparecer en el panel de activas. Podrás consultarla en la pestaña "Archivadas" y reactivarla si hace falta.</p>
+    <div style="display:flex; gap:10px;">
+      <button class="btn btn-secondary btn-block" onclick="closeArchiveModal()">Cancelar</button>
+      <button class="btn btn-danger btn-block" onclick="confirmArchiveAlta()">Archivar</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<!-- Firebase -->
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+<!-- SheetJS para exportación Excel -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+
+<script>
+/* =========================================================
+   CONFIGURACIÓN FIREBASE
+   Sustituye esto por la config de tu proyecto (puede ser
+   el mismo proyecto que Aldelís Muelles, usando una
+   colección nueva "altas_tracker", o un proyecto aparte).
+   Ver README.md para instrucciones de despliegue.
+   ========================================================= */
+const firebaseConfig = {
+  apiKey: "TU_API_KEY",
+  authDomain: "TU_PROYECTO.firebaseapp.com",
+  projectId: "TU_PROYECTO",
+  storageBucket: "TU_PROYECTO.appspot.com",
+  messagingSenderId: "000000000000",
+  appId: "TU_APP_ID"
+};
+
+firebase.initializeApp(firebaseConfig);
+const auth = firebase.auth();
+const db = firebase.firestore();
+
+const COLLECTION = "altas_tracker";
+let currentUser = null;
+let altasCache = {};
+let currentAltaId = null;
+let unsubscribeAltas = null;
+let stockCache = {};
+let unsubscribeStock = null;
+let dashboardFilter = 'activas';
+
+/* =========================================================
+   DEFINICIÓN DE CAMPOS POR DEPARTAMENTO
+   (replican la ficha real del ERP)
+   ========================================================= */
+const CAMPOS_COMERCIAL = [
+  {id:"cliente", label:"Cliente", type:"text"},
+  {id:"volumen_mes", label:"Volumen mes", type:"number"},
+  {id:"eur_kg_objetivo", label:"€/KG objetivo", type:"number"},
+  {id:"in_out_catalogo", label:"In/Out / Catálogo", type:"select", options:["Catalogo","In","Out"]},
+  {id:"fecha_inicio_venta", label:"Fecha inicio venta objetivo", type:"date"},
+  {id:"fecha_min_recepcion", label:"Fecha mínima recepción", type:"date"},
+  {id:"fmv", label:"FMV", type:"text"},
+  {id:"formato", label:"Formato", type:"select", options:["Pendiente","Confirmado"]},
+  {id:"seccion", label:"Sección", type:"text"},
+  {id:"marca", label:"Marca", type:"text"},
+  {id:"peso_medio", label:"Peso medio", type:"number"},
+  {id:"palet", label:"Palet", type:"text"},
+  {id:"tipo_peso", label:"Tipo de peso", type:"select", options:["Pendiente","Fijo","Variable"]},
+  {id:"ean_cliente", label:"EAN 7/8 cliente", type:"text"},
+  {id:"band_caja", label:"Band/Caja", type:"number"},
+  {id:"caj_manto", label:"Caj/Manto", type:"number"},
+  {id:"mantos", label:"Mantos", type:"number"},
+  {id:"caj_palet", label:"Caj/Palet", type:"number"},
+  {id:"tipo_caja", label:"Tipo de caja", type:"text"},
+  {id:"otros_componentes", label:"Otros componentes", type:"select", options:["no","si"]},
+  {id:"envase_logistico", label:"Envase logístico (embalaje secundario de transporte)", type:"text"},
+  {id:"unidades_totales_palet", label:"Unidades totales por palet", type:"number"},
+  {id:"fecha_produccion", label:"Fecha producción", type:"date"}
+];
+
+const CAMPOS_IDI = [
+  {id:"ean13", label:"EAN13", type:"text"},
+  {id:"bandeja", label:"Bandeja", type:"text"},
+  {id:"fecha_etiquetado", label:"Fecha etiquetado", type:"date"},
+  {id:"film", label:"Film", type:"text"},
+  {id:"ean14", label:"EAN14", type:"text"},
+  {id:"alergenos", label:"Alérgenos", type:"select", options:["Pendiente","Revisado"]},
+  {id:"sala", label:"Sala", type:"text"},
+  {id:"ti1", label:"TI1", type:"number"},
+  {id:"validacion_etiqueta", label:"Validación etiqueta", type:"select", options:["Pendiente","Validada"]},
+  {id:"ficha_tecnica", label:"Ficha técnica", type:"select", options:["Pendiente","Completa"]},
+  {id:"tara", label:"Tara", type:"number"},
+  {id:"num_unidades_envase", label:"Nº unidades en envase", type:"number"},
+  {id:"necesidad_prueba_ind", label:"Necesidad prueba industrial", type:"select", options:["no","si"]},
+  {id:"fecha_prueba_ind", label:"Fecha prueba industrial", type:"date"}
+];
+
+const CAMPOS_IT = [
+  {id:"codigo", label:"Código", type:"text"},
+  {id:"plu", label:"PLU", type:"text"},
+  {id:"observaciones", label:"Observaciones", type:"text"},
+  {id:"etiqueta_caja_log", label:"Etiqueta Caja Log", type:"text"},
+  {id:"erp", label:"ERP", type:"select", options:["Unchecked","Checked"]},
+  {id:"nav", label:"NAV", type:"select", options:["Unchecked","Checked"]},
+  {id:"bzb", label:"BZB", type:"select", options:["Unchecked","Checked"]}
+];
+
+const CAMPOS_LAB = [
+  {id:"fecha_vida_maxima", label:"Fecha vida máxima", type:"date"}
+];
+
+/* =========================================================
+   CHECKLIST DE VERIFICACIÓN FÍSICA (la capa que falta hoy)
+   ========================================================= */
+const VERIF_ITEMS = [
+  {id:"stock_bandeja", title:"Stock físico de bandeja", desc:"Cantidad real contada en almacén, no la disponibilidad del ERP.", stockLinked:true},
+  {id:"stock_film", title:"Stock físico de film", desc:"Cantidad real contada en almacén.", stockLinked:true},
+  {id:"stock_etiqueta", title:"Stock físico de etiqueta (versión correcta)", desc:"Verificar que es la versión vigente y no una etiqueta antigua de la misma referencia.", stockLinked:true},
+  {id:"stock_caja", title:"Stock físico de caja/embalaje", desc:"Cantidad real contada en almacén.", stockLinked:true},
+  {id:"stock_envase_logistico", title:"Stock físico de envase logístico", desc:"Embalaje secundario de transporte. Cantidad real contada en almacén.", stockLinked:true},
+  {id:"prueba_impresion", title:"Prueba de impresión Bizerba realizada", desc:"Impresión física de prueba hecha en línea, no solo diseño validado en pantalla."},
+  {id:"plu_testeado", title:"PLU testeado con lector", desc:"Código leído correctamente con el lector/báscula real."},
+  {id:"alergenos_fisico", title:"Alérgenos verificados en etiqueta física", desc:"Comparación etiqueta impresa vs. ficha técnica de I+D."},
+  {id:"formato_linea", title:"Formato de bandeja compatible con línea/molde", desc:"Confirmado en línea con el molde/envasadora asignados."},
+  {id:"linea_asignada", title:"Línea asignada confirmada", desc:"La línea tiene capacidad y disponibilidad para el arranque."}
+];
+
+/* =========================================================
+   AUTENTICACIÓN
+   ========================================================= */
+function doLogin(){
+  const email = document.getElementById('loginEmail').value.trim();
+  const pass = document.getElementById('loginPass').value;
+  document.getElementById('loginError').textContent = "";
+  auth.signInWithEmailAndPassword(email, pass).catch(err=>{
+    document.getElementById('loginError').textContent = "Email o contraseña incorrectos.";
+  });
+}
+function doLogout(){ auth.signOut(); }
+
+auth.onAuthStateChanged(user=>{
+  if(user){
+    currentUser = user;
+    document.getElementById('loginScreen').style.display = 'none';
+    document.getElementById('appShell').style.display = 'block';
+    document.getElementById('userEmailLabel').textContent = user.email;
+    listenAltas();
+    listenStock();
+  } else {
+    currentUser = null;
+    document.getElementById('loginScreen').style.display = 'flex';
+    document.getElementById('appShell').style.display = 'none';
+    if(unsubscribeAltas) unsubscribeAltas();
+    if(unsubscribeStock) unsubscribeStock();
+  }
+});
+
+/* =========================================================
+   STOCK GENERAL (para asociar necesidades con cantidades reales)
+   ========================================================= */
+function listenStock(){
+  unsubscribeStock = db.collection("stock_general").onSnapshot(snap=>{
+    stockCache = {};
+    snap.forEach(doc=>{ stockCache[doc.id] = doc.data(); });
+    if(currentAltaId) renderDetail(currentAltaId);
+    if(document.getElementById('stockView').style.display === 'block') renderStockTable();
+  }, err=>{
+    console.error("Error escuchando stock:", err);
+  });
+}
+
+function openStockView(){
+  document.getElementById('dashboardView').style.display = 'none';
+  document.getElementById('detailView').style.display = 'none';
+  document.getElementById('stockView').style.display = 'block';
+  renderStockTable();
+}
+function closeStockView(){
+  document.getElementById('stockView').style.display = 'none';
+  document.getElementById('dashboardView').style.display = 'block';
+}
+
+function renderStockTable(){
+  const rows = Object.entries(stockCache).sort((a,b)=> a[0].localeCompare(b[0]));
+  const tbody = document.getElementById('stockTableBody');
+  if(rows.length === 0){
+    tbody.innerHTML = `<tr><td colspan="5" style="padding:20px; color:var(--text-dim); text-align:center;">Sin materiales importados todavía.</td></tr>`;
+    return;
+  }
+  tbody.innerHTML = rows.map(([codigo, data])=>`
+    <tr>
+      <td>${codigo}</td>
+      <td>${data.descripcion || '—'}</td>
+      <td>${data.cantidad ?? '—'}</td>
+      <td>${data.unidad || '—'}</td>
+      <td>${data.actualizado_en ? formatFecha(data.actualizado_en) : '—'}</td>
+    </tr>
+  `).join('');
+}
+
+function handleStockExcel(input){
+  const file = input.files[0];
+  if(!file) return;
+  const reader = new FileReader();
+  reader.onload = (e)=>{
+    try{
+      const wb = XLSX.read(e.target.result, {type:'array'});
+      const ws = wb.Sheets[wb.SheetNames[0]];
+      const data = XLSX.utils.sheet_to_json(ws);
+      if(data.length === 0){ showToast("El Excel no tiene filas."); return; }
+
+      const batch = db.batch();
+      let count = 0;
+      const skipped = [];
+      data.forEach((row, idx)=>{
+        const excelRow = idx + 2; // +1 por índice base 0, +1 por la fila de cabecera
+        const codigo = String(row["Código"] ?? row["Codigo"] ?? row["codigo"] ?? "").trim();
+        if(!codigo){
+          skipped.push(`Fila ${excelRow}: falta la columna Código.`);
+          return;
+        }
+        const descripcion = row["Descripción"] ?? row["Descripcion"] ?? row["descripcion"] ?? "";
+        const cantidadRaw = row["Cantidad"] ?? row["cantidad"];
+        const cantidad = Number(cantidadRaw ?? 0);
+        if(cantidadRaw !== undefined && isNaN(cantidad)){
+          skipped.push(`Fila ${excelRow} (${codigo}): la Cantidad "${cantidadRaw}" no es un número, se guardó como 0.`);
+        }
+        const unidad = row["Unidad"] ?? row["unidad"] ?? "";
+        const ref = db.collection("stock_general").doc(codigo);
+        batch.set(ref, {
+          descripcion, cantidad: isNaN(cantidad) ? 0 : cantidad, unidad,
+          actualizado_en: new Date().toISOString(),
+          actualizado_por: currentUser.email
+        });
+        count++;
+      });
+      batch.commit().then(()=>{
+        let msg = `Stock actualizado: ${count} materiales.`;
+        if(skipped.length){
+          msg += `\n${skipped.length} fila(s) con avisos:\n` + skipped.slice(0,8).join('\n');
+          if(skipped.length > 8) msg += `\n… y ${skipped.length - 8} más.`;
+        }
+        showToast(msg);
+      }).catch(err=>{ console.error(err); showToast("Error al guardar el stock."); });
+    }catch(err){
+      console.error(err);
+      showToast("No se pudo leer el archivo. Revisa el formato.");
+    }
+    input.value = "";
+  };
+  reader.readAsArrayBuffer(file);
+}
+
+
+function listenAltas(){
+  unsubscribeAltas = db.collection(COLLECTION)
+    .onSnapshot(snap=>{
+      altasCache = {};
+      snap.forEach(doc=>{ altasCache[doc.id] = {id:doc.id, ...doc.data()}; });
+      renderDashboard();
+      if(currentAltaId && altasCache[currentAltaId]) renderDetail(currentAltaId);
+    }, err=>{
+      console.error("Error escuchando altas:", err);
+      showToast("Error de conexión con la base de datos.");
+    });
+}
+
+function calcVerifProgress(alta){
+  const verif = alta.verificacion_fisica || {};
+  let done = 0, fallo = 0;
+  VERIF_ITEMS.forEach(item=>{
+    const v = verif[item.id];
+    if(v && v.estado === 'verificado') done++;
+    if(v && v.estado === 'fallo') fallo++;
+  });
+  return {done, fallo, total: VERIF_ITEMS.length};
+}
+
+function calcDeptProgress(alta, campos, deptKey){
+  const data = alta[deptKey] || {};
+  let filled = 0;
+  campos.forEach(c=>{
+    const v = data[c.id];
+    if(v !== undefined && v !== null && v !== "") filled++;
+  });
+  return {filled, total: campos.length};
+}
+
+function getSemaforo(alta){
+  const verif = calcVerifProgress(alta);
+  const diasRestantes = getDiasRestantes(alta.fecha_produccion_prevista);
+  if(verif.fallo > 0) return 'rojo';
+  if(diasRestantes !== null && diasRestantes <= 2 && verif.done < verif.total) return 'rojo';
+  if(diasRestantes !== null && diasRestantes <= 5 && verif.done < verif.total) return 'ambar';
+  if(verif.done === verif.total) return 'verde';
+  return 'ambar';
+}
+
+function getDiasRestantes(fechaStr){
+  if(!fechaStr) return null;
+  const hoy = new Date(); hoy.setHours(0,0,0,0);
+  const fecha = new Date(fechaStr + "T00:00:00");
+  return Math.round((fecha - hoy) / (1000*60*60*24));
+}
+
+function setDashboardFilter(filter){
+  dashboardFilter = filter;
+  document.getElementById('filterActivas').classList.toggle('active', filter === 'activas');
+  document.getElementById('filterArchivadas').classList.toggle('active', filter === 'archivadas');
+  renderDashboard();
+}
+
+function renderDashboard(){
+  const showArchivadas = dashboardFilter === 'archivadas';
+  const list = Object.values(altasCache)
+    .filter(a => !!a.archivada === showArchivadas)
+    .sort((a,b)=>{
+      const da = getDiasRestantes(a.fecha_produccion_prevista);
+      const db_ = getDiasRestantes(b.fecha_produccion_prevista);
+      if(da === null) return 1;
+      if(db_ === null) return -1;
+      return da - db_;
+    });
+
+  let rojo=0, ambar=0, verde=0;
+  const container = document.getElementById('altasList');
+  container.innerHTML = "";
+
+  if(list.length === 0){
+    document.getElementById('emptyState').style.display = 'block';
+    document.getElementById('emptyState').textContent = showArchivadas
+      ? "No hay altas archivadas."
+      : 'No hay altas registradas todavía. Crea la primera con "+ Nueva alta".';
+  } else {
+    document.getElementById('emptyState').style.display = 'none';
+  }
+
+  list.forEach(alta=>{
+    const sem = getSemaforo(alta);
+    if(!showArchivadas){
+      if(sem==='rojo') rojo++; else if(sem==='ambar') ambar++; else verde++;
+    }
+
+    const verif = calcVerifProgress(alta);
+    const dias = getDiasRestantes(alta.fecha_produccion_prevista);
+
+    const card = document.createElement('div');
+    card.className = `alta-card semaforo-${sem}${alta.archivada ? ' archivada' : ''}`;
+    card.onclick = ()=>openDetail(alta.id);
+
+    const diasLabel = dias === null ? "—" : (dias < 0 ? `${Math.abs(dias)}d tarde` : `${dias}d`);
+
+    card.innerHTML = `
+      <div class="alta-main">
+        <div class="alta-ref">REF ${alta.ref || '—'}</div>
+        <div class="alta-cliente">${alta.cliente || 'Sin cliente'}</div>
+        <div class="alta-meta">Producción prevista: ${alta.fecha_produccion_prevista || 'sin fecha'}</div>
+      </div>
+      <div class="alta-progress-group">
+        ${miniProg('Verif. física', verif.done, verif.total)}
+      </div>
+      <div>
+        <div class="alta-dias" style="color:${dias!==null && dias<=2 ? 'var(--bad)' : 'var(--text)'}">${diasLabel}</div>
+        <div class="alta-dias-label">${dias!==null && dias<0 ? 'de retraso' : 'para arranque'}</div>
+      </div>
+    `;
+    container.appendChild(card);
+  });
+
+  document.getElementById('statTotal').textContent = showArchivadas ? list.length : list.length;
+  document.getElementById('statRojo').textContent = rojo;
+  document.getElementById('statAmbar').textContent = ambar;
+  document.getElementById('statVerde').textContent = verde;
+
+  const topAlert = document.getElementById('topAlert');
+  if(!showArchivadas && rojo > 0){
+    topAlert.style.display = 'flex';
+    topAlert.innerHTML = `⚠️ Tienes <strong>${rojo}</strong> alta(s) en riesgo de fallo en el arranque. Revísalas antes de producción.`;
+  } else {
+    topAlert.style.display = 'none';
+  }
+}
+
+function miniProg(label, done, total){
+  const pct = total ? Math.round((done/total)*100) : 0;
+  const color = pct === 100 ? 'var(--ok)' : (pct >= 50 ? 'var(--warn)' : 'var(--bad)');
+  return `
+    <div class="mini-prog">
+      <div class="mini-prog-bar"><div class="mini-prog-fill" style="width:${pct}%; background:${color};"></div></div>
+      <div class="mini-prog-label">${label} ${done}/${total}</div>
+    </div>
+  `;
+}
+
+/* =========================================================
+   NUEVA ALTA
+   ========================================================= */
+function openNewAltaModal(){ document.getElementById('newAltaModal').style.display = 'flex'; }
+function closeNewAltaModal(){
+  document.getElementById('newAltaModal').style.display = 'none';
+  document.getElementById('newRef').value = "";
+  document.getElementById('newCliente').value = "";
+  document.getElementById('newFechaProd').value = "";
+}
+function createAlta(){
+  const ref = document.getElementById('newRef').value.trim();
+  const cliente = document.getElementById('newCliente').value.trim();
+  const fecha = document.getElementById('newFechaProd').value;
+  if(!ref){ showToast("Indica la referencia (REF)."); return; }
+
+  db.collection(COLLECTION).add({
+    ref, cliente,
+    fecha_produccion_prevista: fecha || null,
+    archivada: false,
+    creado_por: currentUser.email,
+    creado_en: new Date().toISOString(),
+    comercial:{}, idi:{}, it:{}, lab:{}, verificacion_fisica:{}, ingredientes:[]
+  }).then(()=>{
+    closeNewAltaModal();
+    showToast("Alta creada.");
+  }).catch(err=>{
+    console.error(err);
+    showToast("Error al crear la alta.");
+  });
+}
+
+/* =========================================================
+   ARCHIVAR ALTA
+   ========================================================= */
+function openArchiveModal(){
+  const alta = altasCache[currentAltaId];
+  if(!alta) return;
+  const btn = document.getElementById('archiveBtn');
+  btn.textContent = alta.archivada ? "Reactivar alta" : "Archivar alta";
+  document.getElementById('archiveModal').style.display = 'flex';
+}
+function closeArchiveModal(){ document.getElementById('archiveModal').style.display = 'none'; }
+function confirmArchiveAlta(){
+  const alta = altasCache[currentAltaId];
+  if(!alta) return;
+  const nuevoEstado = !alta.archivada;
+  db.collection(COLLECTION).doc(currentAltaId).update({
+    archivada: nuevoEstado,
+    archivada_por: currentUser.email,
+    archivada_en: new Date().toISOString()
+  }).then(()=>{
+    closeArchiveModal();
+    showToast(nuevoEstado ? "Alta archivada." : "Alta reactivada.");
+    closeDetail();
+  }).catch(err=>{
+    console.error(err);
+    showToast("Error al archivar la alta.");
+  });
+}
+
+/* =========================================================
+   DETALLE
+   ========================================================= */
+function openDetail(id){
+  currentAltaId = id;
+  document.getElementById('dashboardView').style.display = 'none';
+  document.getElementById('stockView').style.display = 'none';
+  document.getElementById('detailView').style.display = 'block';
+  renderDetail(id);
+}
+function closeDetail(){
+  currentAltaId = null;
+  document.getElementById('dashboardView').style.display = 'block';
+  document.getElementById('detailView').style.display = 'none';
+}
+
+function switchTab(tab){
+  document.querySelectorAll('.tab-btn').forEach(b=>b.classList.toggle('active', b.dataset.tab===tab));
+  document.querySelectorAll('.tab-panel').forEach(p=>p.classList.remove('active'));
+  document.getElementById('panel-'+tab).classList.add('active');
+}
+
+function renderDetail(id){
+  const alta = altasCache[id];
+  if(!alta) return;
+
+  document.getElementById('detailTitle').textContent = `REF ${alta.ref} — ${alta.cliente || 'Sin cliente'}`;
+  const dias = getDiasRestantes(alta.fecha_produccion_prevista);
+  document.getElementById('detailMeta').textContent =
+    `Producción prevista: ${alta.fecha_produccion_prevista || 'sin fecha'}` +
+    (dias !== null ? ` · ${dias >= 0 ? dias+' días restantes' : Math.abs(dias)+' días de retraso'}` : '') +
+    (alta.archivada ? ' · Archivada' : '');
+  document.getElementById('archiveBtn').textContent = alta.archivada ? "Reactivar alta" : "Archivar alta";
+
+  renderFieldPanel('panel-comercial', alta, CAMPOS_COMERCIAL, 'comercial');
+  document.getElementById('panel-idi').innerHTML =
+    buildFieldGridHTML(alta, CAMPOS_IDI, 'idi') + buildIngredientesHTML(alta);
+  renderFieldPanel('panel-it', alta, CAMPOS_IT, 'it');
+  renderFieldPanel('panel-lab', alta, CAMPOS_LAB, 'lab');
+  renderVerifPanel(alta);
+
+  const verif = calcVerifProgress(alta);
+  document.getElementById('verifBadge').textContent = `${verif.done}/${verif.total}`;
+}
+
+function buildFieldGridHTML(alta, campos, deptKey){
+  const data = alta[deptKey] || {};
+  return `<div class="field-grid">` + campos.map(c=>{
+    const fieldData = data[c.id] || {};
+    const val = fieldData.valor !== undefined ? fieldData.valor : "";
+    let input = "";
+    if(c.type === 'select'){
+      input = `<select onchange="updateField('${deptKey}','${c.id}', this.value)">
+        ${c.options.map(o=>`<option value="${o}" ${o===val?'selected':''}>${o}</option>`).join('')}
+      </select>`;
+    } else {
+      input = `<input type="${c.type}" value="${val ?? ''}" onchange="updateField('${deptKey}','${c.id}', this.value)">`;
+    }
+    const meta = fieldData.quien ? `<div class="field-meta">${fieldData.quien} · ${formatFecha(fieldData.cuando)}</div>` : "";
+    return `<div class="field-block"><label>${c.label}</label>${input}${meta}</div>`;
+  }).join('') + `</div>`;
+}
+
+function renderFieldPanel(panelId, alta, campos, deptKey){
+  document.getElementById(panelId).innerHTML = buildFieldGridHTML(alta, campos, deptKey);
+}
+
+function buildIngredientesHTML(alta){
+  const ingredientes = alta.ingredientes || [];
+  const total = ingredientes.reduce((sum,i)=> sum + (Number(i.porcentaje)||0), 0);
+  const totalColor = Math.abs(total-100) < 0.01 ? 'var(--ok)' : 'var(--warn)';
+
+  const rows = ingredientes.map((ing, idx)=>`
+    <div class="field-block" style="display:flex; gap:10px; align-items:flex-end;">
+      <div style="flex:2;">
+        <label>Ingrediente ${idx+1}</label>
+        <input type="text" value="${ing.nombre||''}" placeholder="Nombre del ingrediente"
+               onchange="updateIngrediente(${idx}, 'nombre', this.value)">
+      </div>
+      <div style="flex:1;">
+        <label>%</label>
+        <input type="number" step="0.01" value="${ing.porcentaje ?? ''}" placeholder="0.00"
+               onchange="updateIngrediente(${idx}, 'porcentaje', this.value)">
+      </div>
+      <button class="btn btn-secondary btn-small" onclick="removeIngrediente(${idx})">✕</button>
+    </div>
+  `).join('');
+
+  return `
+    <div class="section-label">Ingredientes de la fórmula</div>
+    ${rows || `<div class="field-meta" style="margin-bottom:10px;">Sin ingredientes añadidos todavía.</div>`}
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-top:10px;">
+      <button class="btn btn-secondary btn-small" onclick="addIngrediente()">+ Añadir ingrediente</button>
+      <div style="font-size:12px; color:${totalColor};">Total: ${total.toFixed(2)}%</div>
+    </div>
+  `;
+}
+
+function addIngrediente(){
+  const alta = altasCache[currentAltaId];
+  const ingredientes = [...(alta.ingredientes || []), {nombre:'', porcentaje:''}];
+  db.collection(COLLECTION).doc(currentAltaId).update({ingredientes}).catch(err=>{
+    console.error(err); showToast("Error al añadir el ingrediente.");
+  });
+}
+function removeIngrediente(idx){
+  const alta = altasCache[currentAltaId];
+  const ingredientes = (alta.ingredientes || []).filter((_,i)=> i!==idx);
+  db.collection(COLLECTION).doc(currentAltaId).update({ingredientes}).catch(err=>{
+    console.error(err); showToast("Error al eliminar el ingrediente.");
+  });
+}
+function updateIngrediente(idx, field, value){
+  const alta = altasCache[currentAltaId];
+  const ingredientes = [...(alta.ingredientes || [])];
+  ingredientes[idx] = {...ingredientes[idx], [field]: value};
+  db.collection(COLLECTION).doc(currentAltaId).update({
+    ingredientes,
+    [`ingredientes_meta`]: {quien: currentUser.email, cuando: new Date().toISOString()}
+  }).catch(err=>{
+    console.error(err); showToast("Error al guardar el ingrediente.");
+  });
+}
+
+function updateField(deptKey, fieldId, value){
+  const path = `${deptKey}.${fieldId}`;
+  db.collection(COLLECTION).doc(currentAltaId).update({
+    [path]: { valor: value, quien: currentUser.email, cuando: new Date().toISOString() }
+  }).then(()=> showToast("Guardado.")).catch(err=>{
+    console.error(err); showToast("Error al guardar.");
+  });
+}
+
+function renderVerifPanel(alta){
+  const verif = alta.verificacion_fisica || {};
+  const panel = document.getElementById('panel-verif');
+  panel.innerHTML = VERIF_ITEMS.map(item=>{
+    const v = verif[item.id] || {estado:'pendiente', comentario:''};
+    const icon = v.estado === 'verificado' ? '✅' : (v.estado === 'fallo' ? '❌' : '⏳');
+    const meta = v.quien ? `<div class="verif-meta">${v.quien} · ${formatFecha(v.cuando)}</div>` : "";
+
+    let stockBlock = "";
+    if(item.stockLinked){
+      const codigo = v.codigo_material || "";
+      const necesario = v.cantidad_necesaria || "";
+      const stockData = codigo && stockCache[codigo] ? stockCache[codigo] : null;
+      let disponBlock = "";
+      if(codigo){
+        if(stockData){
+          const suficiente = necesario === "" || Number(stockData.cantidad) >= Number(necesario);
+          disponBlock = `<div class="field-meta" style="color:${suficiente ? 'var(--ok)' : 'var(--bad)'}; margin-top:6px;">
+            Disponible: ${stockData.cantidad} ${stockData.unidad || ''} — ${stockData.descripcion || ''}
+            ${necesario !== "" ? (suficiente ? ' · Suficiente ✅' : ' · Insuficiente ❌') : ''}
+          </div>`;
+        } else {
+          disponBlock = `<div class="field-meta" style="color:var(--warn); margin-top:6px;">Código no encontrado en el stock importado.</div>`;
+        }
+      }
+      stockBlock = `
+        <div class="verif-controls" style="margin-top:8px;">
+          <input type="text" placeholder="Código material" value="${codigo}"
+                 onchange="updateVerif('${item.id}','codigo_material',this.value)">
+          <input type="number" placeholder="Cantidad necesaria" value="${necesario}"
+                 onchange="updateVerif('${item.id}','cantidad_necesaria',this.value)">
+        </div>
+        ${disponBlock}
+      `;
+    }
+
+    return `
+      <div class="verif-item estado-${v.estado}">
+        <div class="verif-icon">${icon}</div>
+        <div class="verif-body">
+          <div class="verif-title">${item.title}</div>
+          <div class="verif-desc">${item.desc}</div>
+          <div class="verif-controls">
+            <select class="estado-select" onchange="updateVerif('${item.id}','estado',this.value)">
+              <option value="pendiente" ${v.estado==='pendiente'?'selected':''}>Pendiente</option>
+              <option value="verificado" ${v.estado==='verificado'?'selected':''}>Verificado</option>
+              <option value="fallo" ${v.estado==='fallo'?'selected':''}>Fallo</option>
+            </select>
+            <input type="text" placeholder="Comentario / motivo" value="${v.comentario||''}"
+                   onchange="updateVerif('${item.id}','comentario',this.value)">
+          </div>
+          ${stockBlock}
+          ${meta}
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+function updateVerif(itemId, field, value){
+  const current = (altasCache[currentAltaId].verificacion_fisica || {})[itemId] || {};
+  const updated = {...current, [field]: value, quien: currentUser.email, cuando: new Date().toISOString()};
+  db.collection(COLLECTION).doc(currentAltaId).update({
+    [`verificacion_fisica.${itemId}`]: updated
+  }).then(()=> showToast("Guardado.")).catch(err=>{
+    console.error(err); showToast("Error al guardar.");
+  });
+}
+
+/* =========================================================
+   EXPORTAR EXCEL
+   ========================================================= */
+function exportExcel(){
+  const rows = Object.values(altasCache).map(alta=>{
+    const verif = calcVerifProgress(alta);
+    return {
+      "REF": alta.ref,
+      "Cliente": alta.cliente,
+      "Fecha producción": alta.fecha_produccion_prevista,
+      "Días restantes": getDiasRestantes(alta.fecha_produccion_prevista),
+      "Verificación física (done/total)": `${verif.done}/${verif.total}`,
+      "Fallos detectados": verif.fallo,
+      "Semáforo": getSemaforo(alta),
+      "Archivada": alta.archivada ? "Sí" : "No"
+    };
+  });
+  const ws = XLSX.utils.json_to_sheet(rows);
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, "Altas");
+  XLSX.writeFile(wb, `altas_nuevas_${new Date().toISOString().slice(0,10)}.xlsx`);
+}
+
+/* =========================================================
+   UTILIDADES
+   ========================================================= */
+function formatFecha(iso){
+  if(!iso) return '';
+  const d = new Date(iso);
+  return d.toLocaleDateString('es-ES') + ' ' + d.toLocaleTimeString('es-ES', {hour:'2-digit', minute:'2-digit'});
+}
+function showToast(msg){
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.style.display = 'block';
+  clearTimeout(t._hideTimer);
+  t._hideTimer = setTimeout(()=>{ t.style.display = 'none'; }, msg.length > 60 ? 6000 : 2200);
+}
+</script>
+</body>
+</html>
