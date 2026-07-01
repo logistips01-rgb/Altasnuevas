@@ -278,17 +278,17 @@
       <div class="stat-row">
         <div class="stat-card">
           <div class="stat-num" id="statTotal">0</div>
-          <div class="stat-label">Altas activas</div>
+          <div class="stat-label" id="statTotalLabel">Altas activas</div>
         </div>
-        <div class="stat-card bad">
+        <div class="stat-card bad" id="statRojoCard">
           <div class="stat-num" id="statRojo">0</div>
           <div class="stat-label">En riesgo (rojo)</div>
         </div>
-        <div class="stat-card warn">
+        <div class="stat-card warn" id="statAmbarCard">
           <div class="stat-num" id="statAmbar">0</div>
           <div class="stat-label">Pendientes de revisar</div>
         </div>
-        <div class="stat-card ok">
+        <div class="stat-card ok" id="statVerdeCard">
           <div class="stat-num" id="statVerde">0</div>
           <div class="stat-label">Listas para arrancar</div>
         </div>
@@ -764,10 +764,14 @@ function renderDashboard(){
     container.appendChild(card);
   });
 
-  document.getElementById('statTotal').textContent = showArchivadas ? list.length : list.length;
+  document.getElementById('statTotal').textContent = list.length;
+  document.getElementById('statTotalLabel').textContent = showArchivadas ? 'Altas archivadas' : 'Altas activas';
   document.getElementById('statRojo').textContent = rojo;
   document.getElementById('statAmbar').textContent = ambar;
   document.getElementById('statVerde').textContent = verde;
+  ['statRojoCard','statAmbarCard','statVerdeCard'].forEach(id=>{
+    document.getElementById(id).style.display = showArchivadas ? 'none' : '';
+  });
 
   const topAlert = document.getElementById('topAlert');
   if(!showArchivadas && rojo > 0){
