@@ -19,15 +19,15 @@ Single-file, sin build step: HTML + CSS + JS vanilla, Firebase como backend
 
 ## Puesta en marcha
 
-1. Crea un proyecto de Firebase (o reutiliza uno existente, ver más abajo) con
-   **Authentication** (método Email/contraseña) y **Firestore** habilitados.
-2. Sustituye el bloque `firebaseConfig` al principio del `<script>` en
-   `public/altas-tracker.html` por la config real de tu proyecto (Configuración
-   del proyecto → General → tus apps → SDK setup and configuration).
-3. Sustituye `TU_PROYECTO` en `.firebaserc` por el ID real del proyecto.
-4. Crea manualmente los usuarios que necesiten acceso en Firebase Authentication
+Este proyecto usa un proyecto Firebase dedicado: **`altas-aa7e5`**. Ya está
+configurado en `public/altas-tracker.html` y en `.firebaserc`.
+
+1. En la [consola de Firebase](https://console.firebase.google.com/project/altas-aa7e5),
+   confirma que **Authentication** (método Email/contraseña) y **Firestore**
+   están habilitados.
+2. Crea manualmente los usuarios que necesiten acceso en Firebase Authentication
    (no hay registro público, solo login).
-5. Despliega:
+3. Despliega:
 
    ```bash
    npm install -g firebase-tools   # si no lo tienes
@@ -35,23 +35,8 @@ Single-file, sin build step: HTML + CSS + JS vanilla, Firebase como backend
    firebase deploy --only firestore:rules,hosting
    ```
 
-### Reutilizar el proyecto de Aldelís Muelles
+   La app quedará publicada en `https://altas-aa7e5.web.app`.
 
-Si prefieres no crear un proyecto Firebase nuevo, puedes usar el mismo proyecto
-que `aldelis-muelles.web.app`:
-
-- Esta app usa colecciones propias (`altas_tracker`, `stock_general`) que no
-  chocan con las de Muelles.
-- **Importante:** `firestore.rules` de este repo solo contiene las reglas de
-  esta app y termina con un `match /{document=**} { allow read, write: if
-  false; }` de cierre. Firestore solo permite un archivo de reglas activo por
-  proyecto, así que si compartes proyecto con Muelles tendrás que **fusionar**
-  los bloques `match /altas_tracker/{...}` y `match /stock_general/{...}` de
-  aquí dentro del `firestore.rules` ya desplegado para Muelles, en vez de
-  desplegar este archivo tal cual (o se romperían las reglas existentes de
-  Muelles).
-- Para el hosting, copia `public/altas-tracker.html` a la carpeta `public/`
-  del proyecto de Muelles y haz `firebase deploy --only hosting` desde allí.
 
 ## Modelo de datos
 
