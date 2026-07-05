@@ -27,15 +27,25 @@ configurado en `public/altas-tracker.html` y en `.firebaserc`.
    están habilitados.
 2. Crea manualmente los usuarios que necesiten acceso en Firebase Authentication
    (no hay registro público, solo login).
-3. Despliega:
+3. Despliega **desde dentro de esta carpeta del repo**:
 
    ```bash
    npm install -g firebase-tools   # si no lo tienes
    firebase login
-   firebase deploy --only firestore:rules,hosting
+   firebase deploy --only firestore:rules,hosting --project altas-aa7e5
    ```
 
    La app quedará publicada en `https://altas-aa7e5.web.app`.
+
+   ⚠️ **Si en tu máquina el CLI de Firebase ya está usado con otros proyectos
+   (ej. Aldelís Muelles)**, usa siempre el flag `--project altas-aa7e5`
+   explícito como arriba — evita que un alias/proyecto activo distinto en la
+   CLI despliegue estos cambios sobre el proyecto equivocado. Puedes comprobar
+   en cualquier momento qué proyecto está activo con:
+
+   ```bash
+   firebase use
+   ```
 
 
 ## Modelo de datos
